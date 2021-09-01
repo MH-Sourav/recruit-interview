@@ -90,7 +90,9 @@ const Snake = () => {
         const newSnake = [newHead, ...snake];
 
         // remove tail
-        newSnake.pop();
+        if (!isFood(newHead)){
+          newSnake.pop();
+        }
 
         return newSnake;
       });
@@ -145,7 +147,7 @@ const Snake = () => {
   }, []);
 
   // ?. is called optional chaining
-  // see: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining
+  // see: thttps://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Opional_chaining
   const isFood = ({ x, y }) => food?.x === x && food?.y === y;
 
   const isSnake = ({ x, y }) =>

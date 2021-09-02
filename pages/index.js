@@ -125,19 +125,27 @@ const Snake = () => {
     const handleNavigation = (event) => {
       switch (event.key) {
         case "ArrowUp":
-          setDirection(Direction.Top);
+          setDirection((direction) => {
+            return direction === Direction.Bottom? Direction.Bottom : Direction.Top;
+          });
           break;
 
         case "ArrowDown":
-          setDirection(Direction.Bottom);
+          setDirection((direction) => {
+            return direction === Direction.Top? Direction.Top : Direction.Bottom;
+          });
           break;
 
         case "ArrowLeft":
-          setDirection(Direction.Left);
+          setDirection((direction) => {
+            return direction === Direction.Right? Direction.Right : Direction.Left;
+          });
           break;
 
         case "ArrowRight":
-          setDirection(Direction.Right);
+          setDirection((direction) => {
+            return direction === Direction.Left? Direction.Left : Direction.Right;
+          });
           break;
       }
     };

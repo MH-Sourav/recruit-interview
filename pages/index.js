@@ -75,7 +75,7 @@ const Snake = () => {
   const [snake, setSnake] = useState(getDefaultSnake());
   const [direction, setDirection] = useState(Direction.Right);
 
-  const [food, setFood] = useState({ x: 4, y: 10 });
+  const [foods, setFoods] = useState([]);
   const [score, setScore] = useState(0);
 
   const [isGameOver, setIsGameOver] = useState(false);
@@ -110,7 +110,7 @@ const Snake = () => {
     const timer = setInterval(runSingleStep, 500);
 
     return () => clearInterval(timer);
-  }, [direction, food]);
+  }, [direction, foods]);
 
   // update score whenever head touches a food
   useEffect(() => {
@@ -119,22 +119,50 @@ const Snake = () => {
       setScore((score) => {
         return score + 1;
       });
-
-      let newFood = getRandomCell();
-      while (isSnake(newFood)) {
-        newFood = getRandomCell();
-      }
-
-      setFood(newFood);
+      setFoods((foods) => {
+        return foods.filter((food) => food.x !== head.x || food.y !== head.y);
+      });
     }
   }, [snake]);
+  
+  //initial food
+  useEffect(() => {setFoods([getNewFood()])}, []);
 
-  //reset game whenever game is over
+  //adding a new food every 3 second
+  useEffect(() => {
+    const addNewFood = () => {
+      setFoods((foods) => {
+        return [...foods, getNewFood()];
+      });  
+    };
+
+    const newFoodTimer = setInterval(addNewFood, 3000);
+
+    return () => clearInterval(newFoodTimer);
+  }, [isGameOver]);
+
+  //removing expired food
+  useEffect(() => {
+    const removeFood = () => {
+      setFoods((foods) => {
+        if (foods.length && (new Date().getTime() - foods[0].time) >= 10000){
+          return foods.slice(1)
+        }
+        return foods
+      });
+    };
+
+    const foodRemovingTimer = setInterval(removeFood, 1000);
+
+    return () => clearInterval(foodRemovingTimer);
+  }, [isGameOver]);
+
+  //reset game whenever the game is over
   useEffect(() => {
     const resetGame = () => {
       setSnake(getDefaultSnake());
       setDirection(Direction.Right);
-      setFood({ x: 4, y: 10 });
+      setFoods([getNewFood()]);
       setScore(0);
       setIsGameOver(false);
     };
@@ -177,9 +205,16 @@ const Snake = () => {
     return () => window.removeEventListener("keydown", handleNavigation);
   }, []);
 
-  // ?. is called optional chaining
-  // see: thttps://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Opional_chaining
-  const isFood = ({ x, y }) => food?.x === x && food?.y === y;
+  const getNewFood = () => {
+    let position = getRandomCell();
+    while (isSnake(position) || isFood(position)) {
+      position = getRandomCell();
+    }
+    return {...position, time: new Date().getTime()};
+  }
+
+  const isFood = ({x, y}) => 
+    foods.find((food) => food.x === x && food.y === y);
 
   const isSnake = ({ x, y }) =>
     snake.find((position) => position.x === x && position.y === y);

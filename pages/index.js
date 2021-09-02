@@ -60,7 +60,7 @@ const Cell = ({ x, y, type }) => {
 
 const getRandomCell = () => ({
   x: Math.floor(Math.random() * Config.width),
-  y: Math.floor(Math.random() * Config.width),
+  y: Math.floor(Math.random() * Config.height),
 });
 
 const Snake = () => {
@@ -78,13 +78,21 @@ const Snake = () => {
   const [food, setFood] = useState({ x: 4, y: 10 });
   const [score, setScore] = useState(0);
 
+  const [isGameOver, setIsGameOver] = useState(false);
+
   // move the snake
   useEffect(() => {
     const runSingleStep = () => {
       setSnake((snake) => {
         const head = snake[0];
-        const newHead = { x: head.x + direction.x, y: head.y + direction.y };
+        const newHead = {
+          x: (head.x + direction.x + Config.width) % Config.width,
+          y: (head.y + direction.y + Config.height) % Config.height
+        };
 
+        if (isSnake(newHead)){
+          setIsGameOver(true);
+        }
         // make a new snake by extending head
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax
         const newSnake = [newHead, ...snake];
@@ -120,6 +128,21 @@ const Snake = () => {
       setFood(newFood);
     }
   }, [snake]);
+
+  //reset game whenever game is over
+  useEffect(() => {
+    const resetGame = () => {
+      setSnake(getDefaultSnake());
+      setDirection(Direction.Right);
+      setFood({ x: 4, y: 10 });
+      setScore(0);
+      setIsGameOver(false);
+    };
+
+    if (isGameOver) {
+      resetGame();
+    }
+  }, [isGameOver]);
 
   useEffect(() => {
     const handleNavigation = (event) => {
